@@ -1,0 +1,73 @@
+# Generated files
+*.apk
+*.ap_
+*.aab
+*.aar
+*.dex
+*.class
+
+# Build directory
+**/build/
+build/
+
+# Local configuration files (sdk path, etc.)
+local.properties
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+misc.xml
+deployment.xml
+modules.xml
+compiler.xml
+gradle.xml
+libraries/
+
+# Gradle files
+.gradle/
+gradle-wrapper.jar # If not committed intentionally
+# Captures files like /gradle/wrapper/gradle-wrapper.properties if you don't want to commit them
+# gradle/wrapper/gradle-wrapper.properties
+
+# Android Studio profiling data
+*.hprof
+*.snapshot
+
+# Log files
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build directory
+.cxx/
+
+# Lint results
+lint/reports/
+lint-results-*.xml
+lint-results-*.html
+
+# Kapt (Kotlin Annotation Processing Tool)
+app/build/generated/source/kapt/
+app/build/generated/source/kaptKotlin/
+
+# Databinding (if used)
+app/build/generated/data_binding_base_class_source_out/
+app/build/intermediates/data_binding_layout_info_type_merge/
+app/build/intermediates/data_binding_base_class_log_artifact/
+
+# Navigation component safe args
+app/build/generated/source/navigation-args/
+
+# Secrets Gradle Plugin (if used)
+app/build/generated/source/secrets/
+
+# Cache files from various tools
+.DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

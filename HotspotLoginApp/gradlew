@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+# Attempt to use JAVA_HOME, otherwise hope java is in PATH
+if [ -z "$JAVA_HOME" ] ; then
+  JAVACMD=java
+else
+  JAVACMD="$JAVA_HOME"/bin/java
+fi
+
+# Gradle installation directory (embedded at creation time)
+_GRADLE_HOME="/opt/gradle-8.2"
+
+# Standard gradlew execution arguments
+DEFAULT_JVM_OPTS="" # Add any default JVM opts if needed
+GRADLE_OPTS="$JAVA_OPTS $GRADLE_OPTS $DEFAULT_JVM_OPTS"
+
+# Check if Gradle home is valid
+if [ ! -d "$_GRADLE_HOME/lib" ]; then
+  echo "ERROR: Gradle home $_GRADLE_HOME seems to be invalid. Directory $_GRADLE_HOME/lib not found."
+  # Cannot exit, so the exec will likely fail.
+fi
+
+# Execute Gradle
+# Ensure the JAVACMD and _GRADLE_HOME are correctly expanded by the shell when this script runs
+# The quoting ensures that variables like  are expanded at gradlew execution time.
+exec "$JAVACMD" $GRADLE_OPTS -cp "$_GRADLE_HOME/lib/*" org.gradle.launcher.GradleMain "$@"

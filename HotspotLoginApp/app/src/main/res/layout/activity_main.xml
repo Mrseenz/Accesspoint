@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/buttonToggleHotspot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Hotspot"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/textViewHotspotStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: Off"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/textViewSsid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SSID: -"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/textViewPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Password: -"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/textViewLoginUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login URL: -"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:autoLink="web"
+        android:layout_marginBottom="8dp"/>
+
+</LinearLayout>
