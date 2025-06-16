@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign in - MockGmail Accounts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>body { font-family: sans-serif; margin: 20px; } .container { max-width: 400px; margin: auto; padding:20px; border: 1px solid #ddd; } input[type=text], input[type=password] { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; } input[type=submit] { padding: 10px; width: 100%; background-color: #4285F4; color: white; border: none; cursor: pointer; } </style>
+</head>
+<body>
+    <div class="container">
+        <h2>MockGmail</h2>
+        <p>Sign in to continue</p>
+        <form method="POST" action="/login/mockgmail">
+            <label for="email">Email or phone (dummy):</label><br>
+            <input type="text" id="email" name="email"><br>
+            <label for="password">Password (dummy):</label><br>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Next">
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hotspot Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        .container { max-width: 400px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); text-align: center;}
+        .button-group button { display: block; width: 100%; padding: 12px; margin-bottom: 12px; font-size: 16px; border-radius: 4px; border: none; cursor: pointer; }
+        .button-gmail { background-color: #DB4437; color: white; }
+        .button-outlook { background-color: #0072C6; color: white; }
+        .button-icloud { background-color: #333; color: white; }
+        .button-gmail:hover { background-color: #c53727; }
+        .button-outlook:hover { background-color: #00569b; }
+        .button-icloud:hover { background-color: #555; }
+        hr { margin: 25px 0; border: 0; border-top: 1px solid #eee; }
+        h3 { margin-top: 0; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; text-align: left; }
+        input[type="password"] { width: calc(100% - 24px); padding: 10px; margin-bottom:15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="submit"] { background-color: #5cb85c; color: white; padding: 12px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        input[type="submit"]:hover { background-color: #4cae4c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Choose a login method:</h2>
+        <div class="button-group">
+            <button class="button-gmail" onclick="window.location.href='/select_mock_gmail'">Login with MockGmail</button>
+            <button class="button-outlook" onclick="window.location.href='/select_mock_outlook'">Login with MockOutlook</button>
+            <button class="button-icloud" onclick="window.location.href='/select_mock_icloud'">Login with MockiCloud</button>
+        </div>
+
+        <hr>
+
+        <h3>Or use simple password:</h3>
+        <form method="POST" action="/login">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Login with Password">
+        </form>
+    </div>
+</body>
+</html>

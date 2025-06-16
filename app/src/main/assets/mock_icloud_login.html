@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign in - MockiCloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>body { font-family: sans-serif; margin: 20px; } .container { max-width: 400px; margin: auto; padding:20px; border: 1px solid #ddd; text-align: center;} input[type=text], input[type=password] { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; } input[type=submit] { padding: 10px; width: 50px; background-color: #007AFF; color: white; border: none; border-radius:50%; cursor: pointer; font-size: 20px;} h2 { margin-bottom: 5px;} </style>
+</head>
+<body>
+    <div class="container">
+        <h2>MockiCloud</h2>
+        <p>Apple ID (dummy)</p>
+        <form method="POST" action="/login/mockicloud">
+            <input type="text" id="apple_id" name="apple_id" placeholder="Apple ID"><br>
+            <input type="password" id="password" name="password" placeholder="Password"><br><br>
+            <input type="submit" value="&#8594;"> <!-- Right arrow -->
+        </form>
+    </div>
+</body>
+</html>
